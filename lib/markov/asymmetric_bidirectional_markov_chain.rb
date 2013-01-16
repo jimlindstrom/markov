@@ -1,8 +1,4 @@
-#!/usr/bin/env ruby
-
-require 'yaml'
-
-module Math
+module Markov
   
   class AsymmetricBidirectionalMarkovChain
     attr_reader :order

@@ -1,8 +1,4 @@
-#!/usr/bin/env ruby
-
-require 'yaml'
-
-module Math
+module Markov
   
   class BidirectionalMarkovChain < AsymmetricBidirectionalMarkovChain
     def initialize(order, lookahead, num_states)

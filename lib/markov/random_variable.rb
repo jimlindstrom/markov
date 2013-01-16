@@ -1,6 +1,4 @@
-#!/usr/bin/env ruby 
-
-module Math
+module Markov
   
   class RandomVariable
     attr_reader :num_observations, :num_outcomes
