@@ -34,7 +34,36 @@ Or install it yourself as:
 
 ## Usage
 
-TODO...
+      # create a new chain
+      mc = Markov::MarkovChain.new(order=2, num_states=5)
+
+      # observe the sequence 1,2,4
+      mc.observe(1)
+      mc.transition(1)
+      mc.observe(2)
+      mc.transition(2)
+      mc.observe(4)
+      mc.transition(4)
+      mc.reset # end this sequence
+
+      # observe the sequence 0,2,3
+      mc.observe(0)
+      mc.transition(0)
+      mc.observe(2)
+      mc.transition(2)
+      mc.observe(3)
+      mc.transition(3)
+      mc.reset # end this sequence
+
+      # without observing (and learning), pretend we've seen 0, 2
+      mc.transition(0)
+      mc.transition(2)
+
+      # ask what the chain's expectations are at this point
+      x = mc.get_expectations
+
+      # given these expectations (a random variableS), choose an outcome.
+      x.choose_outcome.should equal 3 # since 3 has been observed 100% of the time that we've seen 0, 2
 
 ## Contributing
 
