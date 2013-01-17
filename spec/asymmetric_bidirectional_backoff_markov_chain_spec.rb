@@ -170,7 +170,7 @@ describe Markov::AsymmetricBidirectionalBackoffMarkovChain do
       mc.observe(outcome=4, steps_left=6)
       mc.observe(outcome=0, steps_left=6)
       x = mc.get_expectations
-      x.get_surprise(4).should be < x.get_surprise(0)
+      x.surprise_for(4).should be < x.surprise_for(0)
     end
     it "returns a random variable that only chooses states observed" do
       mc = Markov::AsymmetricBidirectionalBackoffMarkovChain.new(order=2, lookahead=1, num_states=2, num_outcomes=5)
@@ -188,7 +188,7 @@ describe Markov::AsymmetricBidirectionalBackoffMarkovChain do
         steps_left -= 1
       end
       x = mc.get_expectations
-      x.get_surprise(73).should be < 0.5
+      x.surprise_for(73).should be < 0.5
     end
     it "returns returns expectations from lower-order predictions in novel situations" do
       mc = Markov::AsymmetricBidirectionalBackoffMarkovChain.new(order=8, lookahead=1, num_states=100, num_outcomes=90)

@@ -177,7 +177,7 @@ describe Markov::BidirectionalMarkovChain do
       mc.observe(state=1, steps_left=8)
       mc.observe(state=0, steps_left=8)
       x = mc.get_expectations
-      x.get_surprise(state=1).should be < x.get_surprise(state=0)
+      x.surprise_for(state=1).should be < x.surprise_for(state=0)
     end
     it "returns a random variable that only chooses states observed" do
       mc = Markov::BidirectionalMarkovChain.new(order=1, lookahead=1, num_states=2)

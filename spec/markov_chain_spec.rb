@@ -127,7 +127,7 @@ describe Markov::MarkovChain do
       mc.observe(1)
       mc.observe(0)
       x = mc.get_expectations
-      x.get_surprise(1).should be < x.get_surprise(0)
+      x.surprise_for(1).should be < x.surprise_for(0)
     end
     it "returns a random variable that only chooses states observed" do
       mc = Markov::MarkovChain.new(order=1, num_states=2)
@@ -163,7 +163,7 @@ describe Markov::MarkovChain do
         mc.observe(pitch)
       end
       x = mc.get_expectations
-      x.get_surprise(73).should be < 0.5
+      x.surprise_for(73).should be < 0.5
     end
   end
 

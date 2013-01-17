@@ -92,7 +92,7 @@ module Markov
       x = RandomVariable.new(@num_outcomes)
       k = state_history_to_key
       (@observations[k] || {}).each do |outcome, num_observations|
-        x.add_possible_outcome(outcome, num_observations)
+        x.observe!(outcome, num_observations)
       end
       return x
     end

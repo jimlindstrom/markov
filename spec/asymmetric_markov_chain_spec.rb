@@ -133,7 +133,7 @@ describe Markov::AsymmetricMarkovChain do
       mc.observe(4)
       mc.observe(0)
       x = mc.get_expectations
-      x.get_surprise(4).should be < x.get_surprise(0)
+      x.surprise_for(4).should be < x.surprise_for(0)
     end
     it "returns a random variable that only chooses states observed" do
       mc = Markov::AsymmetricMarkovChain.new(order=1, num_states=2, num_outcomes=5)
@@ -170,7 +170,7 @@ describe Markov::AsymmetricMarkovChain do
         mc.transition(state=pitch)
       end
       x = mc.get_expectations
-      x.get_surprise(outcome=73).should be < 0.5
+      x.surprise_for(outcome=73).should be < 0.5
     end
   end
 

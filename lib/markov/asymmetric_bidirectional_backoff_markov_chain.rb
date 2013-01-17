@@ -67,7 +67,7 @@ module Markov
       all_outcomes.each do |cur_outcome|
         if expectations.observations[cur_outcome] > 0
         elsif expectations.observations[cur_outcome] == 0
-          expectations.add_possible_outcome(cur_outcome, BACK_OFF_SCALING * sub_expectations.observations[cur_outcome])
+          expectations.observe!(cur_outcome, BACK_OFF_SCALING * sub_expectations.observations[cur_outcome])
         end
       end
 

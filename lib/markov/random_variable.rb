@@ -16,7 +16,7 @@ module Markov
       @outcome_untransformer = lambda { |x| x } 
     end
   
-    def transform_outcomes(t, un_t)
+    def transform_outcomes!(t, un_t)
       @outcome_transformer   = t
       @outcome_untransformer = un_t
     end
@@ -33,9 +33,9 @@ module Markov
   
       rnew = RandomVariable.new(num_outcomes)
       o.each do |x|
-        rnew.add_possible_outcome(x[:outcome] - omin, x[:num_observations])
+        rnew.observe!(x[:outcome] - omin, x[:num_observations])
       end
-      rnew.transform_outcomes(outcome_transformer, outcome_untransformer)
+      rnew.transform_outcomes!(outcome_transformer, outcome_untransformer)
   
       return rnew
     end
@@ -55,20 +55,20 @@ module Markov
       x1.each do |a|
         b = x2.find{|x| x[:outcome]==a[:outcome] }
         if !b.nil?
-          rnew.add_possible_outcome(a[:outcome] - omin, a[:num_observations]*b[:num_observations])
+          rnew.observe!(a[:outcome] - omin, a[:num_observations]*b[:num_observations])
         end
       end
-      rnew.transform_outcomes(outcome_transformer, outcome_untransformer)
+      rnew.transform_outcomes!(outcome_transformer, outcome_untransformer)
   
       return rnew
     end
     
-    def scale(m)
+    def scale!(m)
       @observations.map!{ |x| x*m }
       @num_observations *= m
     end
 
-    def add_possible_outcome(outcome, num_observations)
+    def observe!(outcome, num_observations=1)
       raise ArgumentError.new("num_observations must be >= 0") if num_observations < 0
       raise ArgumentError.new("outcome must be >= 0") if outcome < 0
       raise ArgumentError.new("outcome must be < #{@num_outcomes}") if outcome >= @num_outcomes
@@ -108,7 +108,7 @@ module Markov
       return @observations[outcome].to_f / @num_observations
     end
   
-    def get_surprise(transformed_outcome)
+    def surprise_for(transformed_outcome)
       return 0.5 if @num_observations == 0
   
       outcome = @outcome_untransformer.call(transformed_outcome)
@@ -119,7 +119,7 @@ module Markov
       return surprise
     end
 
-    # This is a more information theoretic version of 'get_surprise' that 
+    # This is a more information theoretic version of 'surprise_for' that 
     # returns the amount of informational content associated with a particular
     # outcome, given the context of this state.
     def information_content(transformed_outcome)
