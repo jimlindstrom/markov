@@ -7,7 +7,7 @@ describe Markov::RandomVariable do
 
   describe ".new" do
     it "creates a random variable" do
-      Markov::RandomVariable.new(small_alphabet).should be_an_instance_of Markov::RandomVariable
+      Markov::RandomVariable.new(small_alphabet).should be_an_instance_of described_class
     end
   end
 

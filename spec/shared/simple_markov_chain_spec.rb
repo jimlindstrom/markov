@@ -12,11 +12,11 @@ shared_examples_for "a simple markov chain" do
 
   describe ".current_state" do
     subject { described_class.new(alphabet2, order=1, *other_params) }
-    context "when no transitions have occurred" do
+    context "when no transition!s have occurred" do
       its(:current_state) { should be_nil }
     end
-    context "when a transition has occurred" do
-      before(:all) { subject.transition(0) }
+    context "when a transition! has occurred" do
+      before(:all) { subject.transition!(0) }
       its(:current_state) { should == 0 }
     end
   end
@@ -27,45 +27,45 @@ shared_examples_for "a simple markov chain" do
     its(:order) { should == order }
   end
 
-  describe ".reset" do
+  describe ".reset!" do
     subject { described_class.new(alphabet2, order=1, *other_params) }
-    context "when transition()s have occurred" do
+    context "when transition!()s have occurred" do
       before(:all) do
-        subject.transition(0)
+        subject.transition!(0)
       end
-      it "resets to the initial state" do
-        subject.reset
+      it "reset!s to the initial state" do
+        subject.reset!
         subject.current_state.should be_nil
       end
     end
   end
 
-  describe ".observe" do
+  describe ".observe!" do
     subject { described_class.new(alphabet2, order=1, *other_params) }
     it "raises an error if the state is outside the 0..(num_symbols-1) range" do
-      expect{ subject.observe(alphabet2.num_symbols) }.to raise_error(ArgumentError)
+      expect{ subject.observe!(alphabet2.num_symbols) }.to raise_error(ArgumentError)
     end
     it "adds an observation of the next symbol" do
       num_before = subject.expectations.num_observations_for(0)
-      subject.observe(0)
+      subject.observe!(0)
       subject.expectations.num_observations_for(0).should be > num_before
     end
     it "does not update state" do
-      subject.transition(1)
-      subject.observe(0)
+      subject.transition!(1)
+      subject.observe!(0)
       subject.current_state.should == 1
     end
   end
 
-  describe ".transition" do
+  describe ".transition!" do
     subject { described_class.new(alphabet2, order=1, *other_params) }
     it "changes the state" do
-      subject.transition(1)
+      subject.transition!(1)
       subject.current_state.should == 1
     end
     it "does not add an observation of the next symbol" do
-      subject.transition(1)
-      subject.reset
+      subject.transition!(1)
+      subject.reset!
       subject.expectations.sample.should be_nil
     end
   end

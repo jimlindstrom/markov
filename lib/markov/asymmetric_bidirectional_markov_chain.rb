@@ -19,7 +19,7 @@ module Markov
   
       @observations = {}
   
-      reset
+      reset!
     end
   
     def current_state
@@ -28,7 +28,7 @@ module Markov
       return cur_state.to_i
     end
    
-    def reset
+    def reset!
       @steps_left           = nil
       @state_history_string = ["nil"]*@order
     end
@@ -58,7 +58,7 @@ module Markov
       return m
     end
   
-    def observe(symbol, steps_left)
+    def observe!(symbol, steps_left)
       raise ArgumentError.new("symbol must be in 0..(num_symbols-1) range") if (symbol < 0) or (symbol >= @alphabet.num_symbols)
       raise ArgumentError.new("steps_left cannot be negative") if (steps_left < 0)
       raise ArgumentError.new("steps_left expected to be #{@steps_left-1}") if !@steps_left.nil? and (steps_left != (@steps_left-1))
@@ -74,7 +74,7 @@ module Markov
       @observations[k][symbol] += 1
     end
   
-    def transition(next_state, steps_left)
+    def transition!(next_state, steps_left)
       raise ArgumentError.new("state must be in 0..(num_states-1) range") if (next_state < 0) or (next_state >= @num_states)
       raise ArgumentError.new("steps_left cannot be negative") if (steps_left < 0)
       raise ArgumentError.new("steps_left expected to be #{@steps_left-1}") if !@steps_left.nil? and (steps_left != (@steps_left-1))

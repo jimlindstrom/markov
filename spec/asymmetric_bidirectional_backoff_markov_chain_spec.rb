@@ -34,12 +34,12 @@ describe Markov::AsymmetricBidirectionalBackoffMarkovChain do
     it "loads the markov chain to a file" do
       mc = Markov::AsymmetricBidirectionalBackoffMarkovChain.new(alphabet90, order=2, lookahead=1, num_states=20)
       [1,2,3].each_with_index do |x, i|
-        mc.observe(   state=x, steps_left=7-i)
-        mc.transition(state=x, steps_left=7-i)
+        mc.observe!(   state=x, steps_left=7-i)
+        mc.transition!(state=x, steps_left=7-i)
       end
-      mc.reset
-      mc.transition(state=1, steps_left=7)
-      mc.transition(state=2, steps_left=6)
+      mc.reset!
+      mc.transition!(state=1, steps_left=7)
+      mc.transition!(state=2, steps_left=6)
       filename = "/tmp/rubymidi_markov_chain.yml"
       mc.save filename
       mc2 = Markov::AsymmetricBidirectionalBackoffMarkovChain.load filename
@@ -67,14 +67,14 @@ describe Markov::AsymmetricBidirectionalBackoffMarkovChain do
       pitches = [64, 71, 71, 69, 76, 74, 73, 71, 74, 73, 71, 73, 74, 73, 71, 73, 71] #, 73
       steps_left = 50 # some dummy value sufficiently high that we won't ever hit the last step
       pitches.each do |pitch|
-        mc.observe(outcome=pitch, steps_left)
-        mc.transition(state=pitch, steps_left)
+        mc.observe!(outcome=pitch, steps_left)
+        mc.transition!(state=pitch, steps_left)
         steps_left -= 1
       end
       x = mc.expectations
       x.surprise_for(73).should be < 0.5
     end
-    context "when the same substring (shorter than the order) has been observed 2x with a different prefix" do
+    context "when the same substring (shorter than the order) has been observe!d 2x with a different prefix" do
       let(:mc) { described_class.new(alphabet90, order=8, lookahead=1, num_states=100) }
       let(:expected_next_val) { 73 }
       before do
@@ -88,13 +88,13 @@ describe Markov::AsymmetricBidirectionalBackoffMarkovChain do
         steps_left = 50 # some dummy value sufficiently high that we won't ever hit the last step
 
         pitches1.each_with_index do |pitch, i|
-          mc.observe( outcome=pitch, steps_left-i)
-          mc.transition(state=pitch, steps_left-i)
+          mc.observe!( outcome=pitch, steps_left-i)
+          mc.transition!(state=pitch, steps_left-i)
         end
-        mc.reset
+        mc.reset!
         pitches2.each_with_index do |pitch, i|
-          mc.observe( outcome=pitch, steps_left-i)
-          mc.transition(state=pitch, steps_left-i)
+          mc.observe!( outcome=pitch, steps_left-i)
+          mc.transition!(state=pitch, steps_left-i)
         end
       end
       it "correctly identifies the next value (using lower-order predictions)" do

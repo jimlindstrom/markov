@@ -16,11 +16,11 @@ describe Markov::MarkovChain do
       before(:all) do
         @mc = Markov::MarkovChain.new(alphabet90, order=1)
         [1, 2, 3].each do |x|
-          @mc.observe(x)
-          @mc.transition(x)
+          @mc.observe!(x)
+          @mc.transition!(x)
         end
-        @mc.reset
-        @mc.transition(2)
+        @mc.reset!
+        @mc.transition!(2)
         @filename = "/tmp/rubymidi_markov_chain.yml"
         @mc.save @filename
       end
@@ -37,13 +37,13 @@ describe Markov::MarkovChain do
       its(:expectations) { should be_an_instance_of Markov::RandomVariable }
       context "given some observations" do
         before(:each) do
-          2.times { subject.observe(1) }
-          1.times { subject.observe(0) }
+          2.times { subject.observe!(1) }
+          1.times { subject.observe!(0) }
         end
-        it "returns a random variable that is less surprised about states observed more often" do
+        it "returns a random variable that is less surprised about states observe!d more often" do
           subject.expectations.surprise_for(1).should be <  subject.expectations.surprise_for(0)
         end
-        it "returns a random variable that only chooses states observed" do
+        it "returns a random variable that only chooses states observe!d" do
           [0, 1].should include(subject.expectations.sample)
         end
       end
@@ -51,26 +51,26 @@ describe Markov::MarkovChain do
 
     context "given a 2nd order chain" do
       subject { Markov::MarkovChain.new(alphabet90, order=2) }
-      it "returns a random variable that only chooses states observed" do
+      it "returns a random variable that only chooses states observe!d" do
         [1, 2, 4].each do |x|
-          subject.observe(x)
-          subject.transition(x)
+          subject.observe!(x)
+          subject.transition!(x)
         end
-        subject.reset
+        subject.reset!
         [0, 2, 3].each do |x|
-          subject.observe(x)
-          subject.transition(x)
+          subject.observe!(x)
+          subject.transition!(x)
         end
-        subject.reset
+        subject.reset!
         [0, 2].each do |x|
-          subject.transition(x)
+          subject.transition!(x)
         end
         subject.expectations.sample.should == 3
       end
       it "isn't surprised by repeated substrings in a long string" do
         pitches = [64, 71, 71, 69, 76, 74, 73, 71, 74, 73, 71, 73, 74, 73, 71, 73, 71] #, 73
         pitches.each do |pitch|
-          subject.observe(pitch)
+          subject.observe!(pitch)
         end
         subject.expectations.surprise_for(73).should be < 0.5
       end

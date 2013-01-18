@@ -36,11 +36,11 @@ describe Markov::BidirectionalMarkovChain do
       before(:all) do
         mc = described_class.new(alphabet90, order=1, lookahead=1, num_states=20)
         [1,3,1,2].each_with_index do |x, i|
-          mc.observe(   state=x, steps_left=3-i)
-          mc.transition(state=x, steps_left=3-i)
+          mc.observe!(   state=x, steps_left=3-i)
+          mc.transition!(state=x, steps_left=3-i)
         end
-        mc.reset
-        mc.transition(state=1, steps_left=1)
+        mc.reset!
+        mc.transition!(state=1, steps_left=1)
         mc.save filename
       end
       subject { described_class.load filename }
@@ -52,31 +52,31 @@ describe Markov::BidirectionalMarkovChain do
   end
 
   describe ".expectations" do
-    it "returns a random variable that only chooses states observed (higher order)" do
+    it "returns a random variable that only chooses states observe!d (higher order)" do
       mc = described_class.new(alphabet5, order=2, lookahead=1, num_states=5)
       [1,2,4].each_with_index do |x, i|
-        mc.observe(   state=x, steps_left=5-i)
-        mc.transition(state=x, steps_left=5-i)
+        mc.observe!(   state=x, steps_left=5-i)
+        mc.transition!(state=x, steps_left=5-i)
       end
-      mc.reset
+      mc.reset!
       [0,2,3].each_with_index do |x, i|
-        mc.observe(   state=x, steps_left=5-i)
-        mc.transition(state=x, steps_left=5-i)
+        mc.observe!(   state=x, steps_left=5-i)
+        mc.transition!(state=x, steps_left=5-i)
       end
-      mc.reset
+      mc.reset!
       [0,2].each_with_index do |x, i|
-        mc.transition(state=x, steps_left=5-i)
+        mc.transition!(state=x, steps_left=5-i)
       end
       mc.expectations.sample.should == 3
     end
-    it "returns a random variable that only chooses states observed with the same steps remaining" do
+    it "returns a random variable that only chooses states observe!d with the same steps remaining" do
       mc = described_class.new(alphabet5, order=1, lookahead=1, num_states=5)
       [1,3,1,2].each_with_index do |x, i|
-        mc.observe(   state=x, steps_left=3-i)
-        mc.transition(state=x, steps_left=3-i)
+        mc.observe!(   state=x, steps_left=3-i)
+        mc.transition!(state=x, steps_left=3-i)
       end
-      mc.reset
-      mc.transition(state=1, steps_left=1)
+      mc.reset!
+      mc.transition!(state=1, steps_left=1)
       mc.expectations.sample.should == 2
     end
   end

@@ -20,11 +20,11 @@ module Markov
       return m
     end
  
-    def observe(symbol)
+    def observe!(symbol)
       super(symbol, @fake_steps_left)
     end
   
-    def transition(next_state)
+    def transition!(next_state)
       super(next_state, @fake_steps_left)
     end
   

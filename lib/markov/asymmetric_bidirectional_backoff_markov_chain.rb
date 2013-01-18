@@ -13,12 +13,12 @@ module Markov
       elsif order > 2
         @sub_chain = AsymmetricBidirectionalBackoffMarkovChain.new(alphabet, order-1, lookahead, num_states)
       end
-      reset
+      reset!
     end
 
-    def reset
+    def reset!
       super
-      @sub_chain.reset if !@sub_chain.nil?
+      @sub_chain.reset! if !@sub_chain.nil?
     end
   
     def save(filename)
@@ -46,14 +46,14 @@ module Markov
       return m
     end
   
-    def observe(symbol, steps_left)
+    def observe!(symbol, steps_left)
       super(symbol, steps_left)
-      @sub_chain.observe(symbol, steps_left)
+      @sub_chain.observe!(symbol, steps_left)
     end
   
-    def transition(next_state, steps_left)
+    def transition!(next_state, steps_left)
       super(next_state, steps_left)
-      @sub_chain.transition(next_state, steps_left)
+      @sub_chain.transition!(next_state, steps_left)
     end
   
     def expectations
