@@ -115,7 +115,7 @@ describe Markov::RandomVariable do
         subject.observe!(symbol=3, num_observations=3)
       end
       it "returns 3" do
-        subject.num_observations_for(2).should == 3
+        subject.num_observations_for(2).should == 2
       end
     end
   end
@@ -151,7 +151,7 @@ describe Markov::RandomVariable do
     end
     context "given an unobserved symbol" do
       it "returns 0.0" do
-        x.probability_of(1).should be_within(0.01).of(0.0)
+        x.probability_of(3).should be_within(0.01).of(0.0)
       end
     end
   end

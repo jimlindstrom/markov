@@ -32,7 +32,7 @@ module Markov
     end
 
     def num_observations_for(symbol)
-      @observations[symbol]
+      @observations[symbol] || 0
     end
     
     def observe!(symbol, num_observations=1)
@@ -48,22 +48,16 @@ module Markov
       # we can't generate anything w/o any observations
       return nil if @num_observations == 0
   
-#      # generate a outcome, based on the CDF
-#      orig_r = r = (rand*(@num_observations-1.0)).round
-#  
-#      outcome = 0
-#      while outcome < @num_outcomes
-#        if @observations[outcome] > 0
-#          if r < @observations[outcome]
-#            puts "choosing #{outcome} => #{@outcome_transformer.call(outcome)}" if LOGGING
-#            return @outcome_transformer.call(outcome)
-#          end
-#          r -= @observations[outcome]
-#        end
-#  
-#        outcome += 1
-#      end
-      return 0
+      # generate a outcome, based on the CDF
+      observed_symbols = @observations.keys
+      r = (rand*(observed_symbols.length-1.0)).round
+  
+      symbol = observed_symbols.shift
+      while r >= @observations[symbol]
+        r -= @observations[symbol]
+        symbol = observed_symbols.shift
+      end
+      return symbol
   
     end
     
@@ -75,7 +69,7 @@ module Markov
     def surprise_for(symbol)
       return 0.5 if @num_observations == 0
   
-      cur_expectation = @observations[symbol]
+      cur_expectation = @observations[symbol] || 0
       max_expectation = @observations.values.max
       surprise = (max_expectation - cur_expectation).to_f / max_expectation
   

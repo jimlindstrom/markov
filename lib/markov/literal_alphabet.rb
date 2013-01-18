@@ -33,7 +33,7 @@ module Markov
     end
 
     def +(other)
-      LiteralAlphabet.new(symbols & other.symbols)
+      LiteralAlphabet.new((symbols + other.symbols).uniq)
     end
   end
 end

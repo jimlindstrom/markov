@@ -55,7 +55,7 @@ shared_examples_for "a finite alphabet" do
       subject.should be_an_instance_of described_class
     end
     it "contains all symbols from both alphabets" do
-      subject.symbols.should == (alphabet.symbols + alphabet2.symbols)
+      subject.symbols.should == (alphabet.symbols + alphabet2.symbols).uniq
     end
   end
 
