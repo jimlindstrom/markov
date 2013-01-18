@@ -103,12 +103,12 @@ module Markov
       raise RuntimeError.new("entropy is undefined until there are observations") if @num_observations == 0
   
       cur_H = 0.0
-#      @observations.each do |cur_observations|
-#        if cur_observations > 0
-#          cur_probability = cur_observations.to_f / @num_observations
-#          cur_H -= cur_probability * Math.log2(cur_probability)
-#        end
-#      end
+      @observations.values.each do |cur_observations|
+        if cur_observations > 0
+          cur_probability = cur_observations.to_f / @num_observations
+          cur_H -= cur_probability * Math.log2(cur_probability)
+        end
+      end
   
       return cur_H
     end

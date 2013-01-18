@@ -8,12 +8,6 @@ shared_examples_for "a simple markov chain" do
     it "raises an error for an order of 0 or lower" do
       expect{ described_class.new(alphabet2, order=0, *other_params) }.to raise_error(ArgumentError)
     end
-    it "builds a chain with two or more states" do
-      described_class.new(alphabet2, order=1, *other_params).should be_an_instance_of described_class
-    end
-    it "raises an error for fewer than 2 states" do
-      expect{ described_class.new(alphabet1, order=1, *other_params) }.to raise_error(ArgumentError)
-    end
   end
 
   describe ".current_state" do
@@ -65,17 +59,14 @@ shared_examples_for "a simple markov chain" do
 
   describe ".transition" do
     subject { described_class.new(alphabet2, order=1, *other_params) }
-    it "raises an error if the state is outside the 0..(num_symbols-1) range" do
-      expect{ subject.transition(alphabet2.num_symbols) }.to raise_error(ArgumentError)
+    it "changes the state" do
+      subject.transition(1)
+      subject.current_state.should == 1
     end
     it "does not add an observation of the next symbol" do
       subject.transition(1)
       subject.reset
       subject.expectations.sample.should be_nil
-    end
-    it "changes the state" do
-      subject.transition(1)
-      subject.current_state.should == 1
     end
   end
 

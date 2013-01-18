@@ -66,7 +66,7 @@ module Markov
               sub_expectations.alphabet.num_symbols-1].max) do |cur_symbol|
         if expectations.observations[cur_symbol] && expectations.observations[cur_symbol] > 0
           # noop
-        elsif expectations.observations[cur_symbol] == 0
+        elsif sub_expectations.observations[cur_symbol]
           expectations.observe!(cur_symbol, BACK_OFF_SCALING * sub_expectations.observations[cur_symbol])
         end
       end

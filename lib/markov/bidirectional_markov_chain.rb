@@ -12,10 +12,10 @@ module Markov
       end
       raise RuntimeError.new("bad markov file") if docs.length != 7
 
-      #m = BidirectionalMarkovChain.new(docs[0], docs[1], docs[2])
-      #m.set_internals(docs[4], docs[5], docs[6])
+      m = BidirectionalMarkovChain.new(docs[0], docs[1], docs[2], docs[3])
+      m.set_internals(docs[4], docs[5], docs[6])
 
-      #return m
+      return m
     end
 
   end

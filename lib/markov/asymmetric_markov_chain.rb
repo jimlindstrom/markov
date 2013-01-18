@@ -14,7 +14,7 @@ module Markov
       end
       raise RuntimeError.new("bad markov file") if docs.length != 7
 
-      m = AsymmetricMarkovChain.new(docs[0], docs[2], docs[3])
+      m = AsymmetricMarkovChain.new(docs[0], docs[1], docs[3])
       m.set_internals(docs[4], docs[5], docs[6])
 
       return m

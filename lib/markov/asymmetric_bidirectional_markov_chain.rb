@@ -35,13 +35,13 @@ module Markov
   
     def save(filename)
       File.open(filename, 'w') do |f| 
-        f.puts YAML::dump @alphabet
-        f.puts YAML::dump @order
-        f.puts YAML::dump @lookahead
-        f.puts YAML::dump @num_states
-        f.puts YAML::dump @observations
-        f.puts YAML::dump @state_history_string
-        f.puts YAML::dump @steps_left
+        f.puts YAML::dump @alphabet #0
+        f.puts YAML::dump @order #1
+        f.puts YAML::dump @lookahead #2
+        f.puts YAML::dump @num_states #3
+        f.puts YAML::dump @observations #4
+        f.puts YAML::dump @state_history_string #5
+        f.puts YAML::dump @steps_left #6
       end
     end
 

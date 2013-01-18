@@ -11,6 +11,20 @@ describe Markov::AsymmetricMarkovChain do
     let(:other_params) { [num_states=20] }
   end
 
+  describe "#new" do
+    it "raises an error for fewer than 2 states" do
+      expect{ described_class.new(alphabet1, order=1, num_states=1) }.to raise_error(ArgumentError)
+    end
+  end
+
+  describe ".transition" do
+    let(:num_states) { 3 }
+    subject { described_class.new(alphabet2, order=1, num_states) }
+    it "raises an error if the state is outside the 0..(num_symbols-1) range" do
+      expect{ subject.transition(num_states) }.to raise_error(ArgumentError)
+    end
+  end
+
   describe "#load" do
     it "loads the markov chain to a file" do
       mc = Markov::AsymmetricMarkovChain.new(alphabet90, order=1, num_states=20)
