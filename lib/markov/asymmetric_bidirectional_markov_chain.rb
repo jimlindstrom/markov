@@ -87,7 +87,7 @@ module Markov
       puts "transition k: " + state_history_to_key.inspect + " (after)" if LOGGING
     end
   
-    def get_expectations
+    def expectations
       x = RandomVariable.new(@alphabet)
       k = state_history_to_key
       (@observations[k] || {}).each do |symbol, num_observations|

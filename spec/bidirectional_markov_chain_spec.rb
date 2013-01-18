@@ -109,7 +109,7 @@ describe Markov::BidirectionalMarkovChain do
       filename = "/tmp/rubymidi_bidirectional_markov_chain.yml"
       mc.save filename
       mc2 = Markov::BidirectionalMarkovChain.load filename
-      x = mc2.get_expectations
+      x = mc2.expectations
       x.sample.should == 2
     end
   end
@@ -156,7 +156,7 @@ describe Markov::BidirectionalMarkovChain do
       mc = Markov::BidirectionalMarkovChain.new(alphabet2, order=1, lookahead=1, num_states=2)
       mc.transition(state=1, steps_left=3)
       mc.reset
-      mc.get_expectations.sample.should be_nil
+      mc.expectations.sample.should be_nil
     end
     it "changes the state" do
       mc = Markov::BidirectionalMarkovChain.new(alphabet2, order=1, lookahead=1, num_states=2)
@@ -170,23 +170,23 @@ describe Markov::BidirectionalMarkovChain do
     end
   end
 
-  context "get_expectations" do
+  context "expectations" do
     it "returns a random variable" do
       mc = Markov::BidirectionalMarkovChain.new(alphabet2, order=1, lookahead=1, num_states=2)
-      mc.get_expectations.should be_an_instance_of Markov::RandomVariable
+      mc.expectations.should be_an_instance_of Markov::RandomVariable
     end
     it "returns a random variable that is less surprised about states observed more often" do
       mc = Markov::BidirectionalMarkovChain.new(alphabet2, order=1, lookahead=1, num_states=2)
       mc.observe(state=1, steps_left=8)
       mc.observe(state=1, steps_left=8)
       mc.observe(state=0, steps_left=8)
-      x = mc.get_expectations
+      x = mc.expectations
       x.surprise_for(state=1).should be < x.surprise_for(state=0)
     end
     it "returns a random variable that only chooses states observed" do
       mc = Markov::BidirectionalMarkovChain.new(alphabet2, order=1, lookahead=1, num_states=2)
       mc.observe(state=1, steps_left=8)
-      x = mc.get_expectations
+      x = mc.expectations
       x.sample.should == 1
     end
     it "returns a random variable that only chooses states observed (higher order)" do
@@ -207,7 +207,7 @@ describe Markov::BidirectionalMarkovChain do
       mc.reset
       mc.transition(state=0, steps_left=5)
       mc.transition(state=2, steps_left=4)
-      x = mc.get_expectations
+      x = mc.expectations
       x.sample.should == 3
     end
     it "returns a random variable that only chooses states observed with the same steps remaining" do
@@ -222,7 +222,7 @@ describe Markov::BidirectionalMarkovChain do
       mc.transition(state=2, steps_left=0)
       mc.reset
       mc.transition(state=1, steps_left=1)
-      x = mc.get_expectations
+      x = mc.expectations
       x.sample.should == 2
     end
   end

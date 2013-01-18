@@ -56,11 +56,11 @@ module Markov
       @sub_chain.transition(next_state, steps_left)
     end
   
-    def get_expectations
+    def expectations
       # see algorithm: http://www.doc.gold.ac.uk/~mas01mtp/papers/PearceWigginsJNMR04.pdf (p. 2)
 
       expectations = super
-      sub_expectations = @sub_chain.get_expectations
+      sub_expectations = @sub_chain.expectations
 
       0.upto([    expectations.alphabet.num_symbols-1, 
               sub_expectations.alphabet.num_symbols-1].max) do |cur_symbol|

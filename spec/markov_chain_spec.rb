@@ -5,169 +5,75 @@ require "spec_helper"
 describe Markov::MarkovChain do
   let(:alphabet1) { Markov::LiteralAlphabet.new((1..1).to_a) }
   let(:alphabet2) { Markov::LiteralAlphabet.new((1..2).to_a) }
-  let(:alphabet3) { Markov::LiteralAlphabet.new((1..3).to_a) }
-  let(:alphabet4) { Markov::LiteralAlphabet.new((1..4).to_a) }
-  let(:alphabet5) { Markov::LiteralAlphabet.new((1..5).to_a) }
   let(:alphabet90) { Markov::LiteralAlphabet.new((1..90).to_a) }
 
-  context "new" do
-    it "builds a chain with an order (# of current/past states used to predict the future) of 1 or greater" do
-      Markov::MarkovChain.new(alphabet5, order=1).should be_an_instance_of Markov::MarkovChain
-    end
-    it "raises an error for an order of 0 or lower" do
-      expect{ Markov::MarkovChain.new(alphabet5, order=0) }.to raise_error(ArgumentError)
-    end
-    it "builds a chain with two or more states" do
-      Markov::MarkovChain.new(alphabet2, order=1).should be_an_instance_of Markov::MarkovChain
-    end
-    it "raises an error for fewer than 2 states" do
-      expect{ Markov::MarkovChain.new(alphabet1, order=1) }.to raise_error(ArgumentError)
-    end
+  it_should_behave_like "a simple markov chain" do
+    let(:other_params) { [] }
   end
 
-  context "current_state" do
-    it "returns nil if in the initial state" do
-      mc = Markov::MarkovChain.new(alphabet2, order=1)
-      mc.current_state.should be_nil
-    end
-    it "returns the current state" do
-      mc = Markov::MarkovChain.new(alphabet2, order=1)
-      mc.transition(0)
-      mc.current_state.should == 0
-    end
-  end
-
-  context "order" do
-    it "returns the number of historical states the chain uses to predict future states" do
-      mc = Markov::MarkovChain.new(alphabet3, order=1)
-      mc.order.should == 1
-    end
-  end
-
-  context "reset" do
-    it "resets the state back to the initial state (undoes do_transitions)" do
-      mc = Markov::MarkovChain.new(alphabet3, order=1)
-      mc.transition(0)
-      mc.reset
-      mc.current_state.should be_nil
-    end
-  end
-
-  context "save" do
-    it "saves the markov chain to a file" do
-      mc = Markov::MarkovChain.new(alphabet2, order=1)
-      mc.observe(1)
-      mc.observe(1)
-      mc.observe(0)
-      filename = "/tmp/rubymidi_markov_chain.yml"
-      mc.save filename
-      File.exists?(filename).should == true
-    end
-  end
-
-  context "load" do
-    it "loads the markov chain to a file" do
-      mc = Markov::MarkovChain.new(alphabet90, order=1)
-      mc.observe(1)
-      mc.transition(1)
-      mc.observe(2)
-      mc.transition(2)
-      mc.observe(3)
-      mc.transition(3)
-      mc.reset
-      mc.transition(2)
-      filename = "/tmp/rubymidi_markov_chain.yml"
-      mc.save filename
-      mc2 = Markov::MarkovChain.load filename
-      x = mc2.get_expectations
-      x.sample.should == 3
-    end
-  end
-
-  context "observe" do
-    it "raises an error if the state is outside the 0..(num_symbols-1) range" do
-      mc = Markov::MarkovChain.new(alphabet2, order=1)
-      expect{ mc.observe(alphabet2.num_symbols) }.to raise_error(ArgumentError)
-    end
-    it "adds an observation of the next symbol" do
-      mc = Markov::MarkovChain.new(alphabet2, order=1)
-      mc.observe(0)
-      mc.current_state.should be_nil
-    end
-    it "does not update state" do
-      mc = Markov::MarkovChain.new(alphabet2, order=1)
-      mc.transition(1)
-      mc.observe(0)
-      mc.current_state.should == 1
-    end
-  end
-
-  context "transition" do
-    it "raises an error if the state is outside the 0..(num_symbols-1) range" do
-      mc = Markov::MarkovChain.new(alphabet2, order=1)
-      expect{ mc.transition(alphabet2.num_symbols) }.to raise_error(ArgumentError)
-    end
-    it "does not add an observation of the next symbol" do
-      mc = Markov::MarkovChain.new(alphabet2, order=1)
-      mc.transition(1)
-      mc.reset
-      mc.get_expectations.sample.should be_nil
-    end
-    it "changes the state" do
-      mc = Markov::MarkovChain.new(alphabet2, order=1)
-      mc.transition(1)
-      mc.current_state.should == 1
-    end
-  end
-
-  context "get_expectations" do
-    it "returns a random variable" do
-      mc = Markov::MarkovChain.new(alphabet2, order=1)
-      mc.get_expectations.should be_an_instance_of Markov::RandomVariable
-    end
-    it "returns a random variable that is less surprised about states observed more often" do
-      mc = Markov::MarkovChain.new(alphabet2, order=1)
-      mc.observe(1)
-      mc.observe(1)
-      mc.observe(0)
-      x = mc.get_expectations
-      x.surprise_for(1).should be < x.surprise_for(0)
-    end
-    it "returns a random variable that only chooses states observed" do
-      mc = Markov::MarkovChain.new(alphabet2, order=1)
-      mc.observe(1)
-      x = mc.get_expectations
-      x.sample.should == 1
-    end
-    it "returns a random variable that only chooses states observed (higher order)" do
-      mc = Markov::MarkovChain.new(alphabet5, order=2)
-      mc.observe(1)
-      mc.transition(1)
-      mc.observe(2)
-      mc.transition(2)
-      mc.observe(4)
-      mc.transition(4)
-      mc.reset
-      mc.observe(0)
-      mc.transition(0)
-      mc.observe(2)
-      mc.transition(2)
-      mc.observe(3)
-      mc.transition(3)
-      mc.reset
-      mc.transition(0)
-      mc.transition(2)
-      x = mc.get_expectations
-      x.sample.should == 3
-    end
-    it "isn't surprised by repeated substrings in a long string" do
-      mc = Markov::MarkovChain.new(alphabet90, order=2)
-      pitches = [64, 71, 71, 69, 76, 74, 73, 71, 74, 73, 71, 73, 74, 73, 71, 73, 71] #, 73
-      pitches.each do |pitch|
-        mc.observe(pitch)
+  describe "#load" do
+    context "when a MarkovChain has been saved" do
+      before(:all) do
+        @mc = Markov::MarkovChain.new(alphabet90, order=1)
+        [1, 2, 3].each do |x|
+          @mc.observe(x)
+          @mc.transition(x)
+        end
+        @mc.reset
+        @mc.transition(2)
+        @filename = "/tmp/rubymidi_markov_chain.yml"
+        @mc.save @filename
       end
-      x = mc.get_expectations
-      x.surprise_for(73).should be < 0.5
+      it "loads the markov chain to a file" do
+        mc2 = Markov::MarkovChain.load @filename
+        mc2.expectations.sample.should == @mc.expectations.sample
+      end
+    end
+  end
+
+  describe ".expectations" do
+    context "given a 1st order chain" do
+      subject { Markov::MarkovChain.new(alphabet90, order=1) }
+      its(:expectations) { should be_an_instance_of Markov::RandomVariable }
+      context "given some observations" do
+        before(:each) do
+          2.times { subject.observe(1) }
+          1.times { subject.observe(0) }
+        end
+        it "returns a random variable that is less surprised about states observed more often" do
+          subject.expectations.surprise_for(1).should be <  subject.expectations.surprise_for(0)
+        end
+        it "returns a random variable that only chooses states observed" do
+          [0, 1].should include(subject.expectations.sample)
+        end
+      end
+    end
+
+    context "given a 2nd order chain" do
+      subject { Markov::MarkovChain.new(alphabet90, order=2) }
+      it "returns a random variable that only chooses states observed" do
+        [1, 2, 4].each do |x|
+          subject.observe(x)
+          subject.transition(x)
+        end
+        subject.reset
+        [0, 2, 3].each do |x|
+          subject.observe(x)
+          subject.transition(x)
+        end
+        subject.reset
+        [0, 2].each do |x|
+          subject.transition(x)
+        end
+        subject.expectations.sample.should == 3
+      end
+      it "isn't surprised by repeated substrings in a long string" do
+        pitches = [64, 71, 71, 69, 76, 74, 73, 71, 74, 73, 71, 73, 74, 73, 71, 73, 71] #, 73
+        pitches.each do |pitch|
+          subject.observe(pitch)
+        end
+        subject.expectations.surprise_for(73).should be < 0.5
+      end
     end
   end
 
