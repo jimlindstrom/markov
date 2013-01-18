@@ -3,8 +3,8 @@ module Markov
   # This is just a markov chain where the outcomes are states.  (The more 
   # general, asymmetric one lets the outcomes be something other than states.)
   class MarkovChain < AsymmetricMarkovChain
-    def initialize(order, num_states)
-      super(order, num_states, num_states)
+    def initialize(alphabet, order)
+      super(alphabet, order, alphabet.num_symbols)
     end
  
     def self.load(filename)

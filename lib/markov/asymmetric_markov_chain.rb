@@ -2,8 +2,8 @@ module Markov
   
   class AsymmetricMarkovChain < AsymmetricBidirectionalMarkovChain
 
-    def initialize(order, num_states, num_outcomes)
-      super(order, lookahead=1, num_states, num_outcomes)
+    def initialize(alphabet, order, num_states)
+      super(alphabet, order, lookahead=1, num_states)
       @fake_steps_left = lookahead+1
     end
   
@@ -20,8 +20,8 @@ module Markov
       return m
     end
  
-    def observe(outcome)
-      super(outcome, @fake_steps_left)
+    def observe(symbol)
+      super(symbol, @fake_steps_left)
     end
   
     def transition(next_state)

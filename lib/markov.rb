@@ -1,6 +1,7 @@
 require 'yaml'
 
 markov_files = ['version',
+                'literal_alphabet',
                 'random_variable',
                 'asymmetric_bidirectional_markov_chain',
                 'asymmetric_markov_chain',

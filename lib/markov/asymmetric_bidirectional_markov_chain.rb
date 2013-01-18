@@ -7,16 +7,15 @@ module Markov
 
     LOGGING = false
 
-    def initialize(order, lookahead, num_states, num_outcomes)
+    def initialize(alphabet, order, lookahead, num_states)
       raise ArgumentError.new("order must be positive") if order < 1
       raise ArgumentError.new("must have two or more states") if num_states < 2
-      raise ArgumentError.new("must have two or more outcomes") if num_outcomes < 2
       raise ArgumentError.new("must have a lookahead of 1 or more") if lookahead < 1
   
+      @alphabet = alphabet
       @order = order
       @lookahead = lookahead
       @num_states = num_states
-      @num_outcomes = num_outcomes
   
       @observations = {}
   
@@ -36,10 +35,10 @@ module Markov
   
     def save(filename)
       File.open(filename, 'w') do |f| 
+        f.puts YAML::dump @alphabet
         f.puts YAML::dump @order
         f.puts YAML::dump @lookahead
         f.puts YAML::dump @num_states
-        f.puts YAML::dump @num_outcomes
         f.puts YAML::dump @observations
         f.puts YAML::dump @state_history_string
         f.puts YAML::dump @steps_left
@@ -59,8 +58,8 @@ module Markov
       return m
     end
   
-    def observe(outcome, steps_left)
-      raise ArgumentError.new("outcome must be in 0..(num_outcomes-1) range") if (outcome < 0) or (outcome >= @num_outcomes)
+    def observe(symbol, steps_left)
+      raise ArgumentError.new("symbol must be in 0..(num_symbols-1) range") if (symbol < 0) or (symbol >= @alphabet.num_symbols)
       raise ArgumentError.new("steps_left cannot be negative") if (steps_left < 0)
       raise ArgumentError.new("steps_left expected to be #{@steps_left-1}") if !@steps_left.nil? and (steps_left != (@steps_left-1))
   
@@ -69,10 +68,10 @@ module Markov
       if @observations[k].nil?
         @observations[k] = {}
       end
-      if @observations[k][outcome].nil?
-        @observations[k][outcome] = 0
+      if @observations[k][symbol].nil?
+        @observations[k][symbol] = 0
       end
-      @observations[k][outcome] += 1
+      @observations[k][symbol] += 1
     end
   
     def transition(next_state, steps_left)
@@ -89,10 +88,10 @@ module Markov
     end
   
     def get_expectations
-      x = RandomVariable.new(@num_outcomes)
+      x = RandomVariable.new(@alphabet)
       k = state_history_to_key
-      (@observations[k] || {}).each do |outcome, num_observations|
-        x.observe!(outcome, num_observations)
+      (@observations[k] || {}).each do |symbol, num_observations|
+        x.observe!(symbol, num_observations)
       end
       return x
     end

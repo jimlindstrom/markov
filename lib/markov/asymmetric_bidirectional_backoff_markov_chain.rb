@@ -4,14 +4,14 @@ module Markov
 
     BACK_OFF_SCALING = 0.05
 
-    def initialize(order, lookahead, num_states, num_outcomes)
-      super(order, lookahead, num_states, num_outcomes)
+    def initialize(alphabet, order, lookahead, num_states)
+      super(alphabet, order, lookahead, num_states)
       if order == 1
         raise ArgumentError.new("You can't have a backoff chain with order 1, use AsymmetricBidirectionalMarkovChain instead")
       elsif order == 2
-        @sub_chain = AsymmetricBidirectionalMarkovChain.new(order-1, lookahead, num_states, num_outcomes)
+        @sub_chain = AsymmetricBidirectionalMarkovChain.new(alphabet, order-1, lookahead, num_states)
       elsif order > 2
-        @sub_chain = AsymmetricBidirectionalBackoffMarkovChain.new(order-1, lookahead, num_states, num_outcomes)
+        @sub_chain = AsymmetricBidirectionalBackoffMarkovChain.new(alphabet, order-1, lookahead, num_states)
       end
       reset
     end
@@ -46,9 +46,9 @@ module Markov
       return m
     end
   
-    def observe(outcome, steps_left)
-      super(outcome, steps_left)
-      @sub_chain.observe(outcome, steps_left)
+    def observe(symbol, steps_left)
+      super(symbol, steps_left)
+      @sub_chain.observe(symbol, steps_left)
     end
   
     def transition(next_state, steps_left)
@@ -62,12 +62,12 @@ module Markov
       expectations = super
       sub_expectations = @sub_chain.get_expectations
 
-      all_outcomes = Array(0..[expectations.num_outcomes-1, sub_expectations.num_outcomes-1].max)
-
-      all_outcomes.each do |cur_outcome|
-        if expectations.observations[cur_outcome] > 0
-        elsif expectations.observations[cur_outcome] == 0
-          expectations.observe!(cur_outcome, BACK_OFF_SCALING * sub_expectations.observations[cur_outcome])
+      0.upto([    expectations.alphabet.num_symbols-1, 
+              sub_expectations.alphabet.num_symbols-1].max) do |cur_symbol|
+        if expectations.observations[cur_symbol] && expectations.observations[cur_symbol] > 0
+          # noop
+        elsif expectations.observations[cur_symbol] == 0
+          expectations.observe!(cur_symbol, BACK_OFF_SCALING * sub_expectations.observations[cur_symbol])
         end
       end
 
