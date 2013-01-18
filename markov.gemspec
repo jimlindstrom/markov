@@ -7,7 +7,7 @@ Gem::Specification.new do |s|
   s.version     = Markov::VERSION  
   s.platform    = Gem::Platform::RUBY  
   s.authors     = ["Jim Lindstrom"]  
-  s.email       = ["jim.lindstrom@hgmail.com"]  
+  s.email       = ["jim.lindstrom@gmail.com"]  
   s.homepage    = ""  
   s.summary     = %q{Ruby implementation of various Markov models}  
   s.description = %q{Ruby implementation of various Markov models}  
