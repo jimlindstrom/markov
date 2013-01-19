@@ -3,35 +3,37 @@ shared_examples_for "a simple markov chain" do
   let(:alphabet2) { Markov::LiteralAlphabet.new((1..2).to_a) }
 
   describe "#new" do
-    subject { described_class.new(alphabet2, order=1, *other_params) }
+    subject { described_class.new(*params_for_new(alphabet2, order=1)) }
     it { should be_an_instance_of described_class }
-    it "raises an error for an order of 0 or lower" do
-      expect{ described_class.new(alphabet2, order=0, *other_params) }.to raise_error(ArgumentError)
+    context "when order <= 0" do
+      it "raises an error" do
+        expect{ described_class.new(*params_for_new(alphabet2, order=0)) }.to raise_error(ArgumentError)
+      end
     end
   end
 
   describe ".current_state" do
-    subject { described_class.new(alphabet2, order=1, *other_params) }
+    subject { described_class.new(*params_for_new(alphabet2, order=1)) }
     context "when no transition!s have occurred" do
       its(:current_state) { should be_nil }
     end
     context "when a transition! has occurred" do
-      before(:all) { subject.transition!(0) }
-      its(:current_state) { should == 0 }
+      before(:all) { subject.transition!(1) }
+      its(:current_state) { should == 1 }
     end
   end
 
   describe ".order" do
     let(:order) { 1 }
-    subject { described_class.new(alphabet2, order, *other_params) }
+    subject { described_class.new(*params_for_new(alphabet2, order)) }
     its(:order) { should == order }
   end
 
   describe ".reset!" do
-    subject { described_class.new(alphabet2, order=1, *other_params) }
+    subject { described_class.new(*params_for_new(alphabet2, order=1)) }
     context "when transition!()s have occurred" do
       before(:all) do
-        subject.transition!(0)
+        subject.transition!(1)
       end
       it "reset!s to the initial state" do
         subject.reset!
@@ -41,24 +43,27 @@ shared_examples_for "a simple markov chain" do
   end
 
   describe ".observe!" do
-    subject { described_class.new(alphabet2, order=1, *other_params) }
-    it "raises an error if the state is outside the 0..(num_symbols-1) range" do
-      expect{ subject.observe!(alphabet2.num_symbols) }.to raise_error(ArgumentError)
-    end
+    subject { described_class.new(*params_for_new(alphabet2, order=1)) }
     it "adds an observation of the next symbol" do
-      num_before = subject.expectations.num_observations_for(0)
-      subject.observe!(0)
-      subject.expectations.num_observations_for(0).should be > num_before
+      num_before = subject.expectations.num_observations_for(1)
+      subject.observe!(1)
+      subject.expectations.num_observations_for(1).should be > num_before
     end
     it "does not update state" do
       subject.transition!(1)
-      subject.observe!(0)
+      subject.observe!(2)
       subject.current_state.should == 1
+    end
+    context "when the symbol is not in the alphabet" do
+      let(:invalid_symbol) { 3 }
+      it "raises an error" do
+        expect{ subject.observe!(invalid_symbol) }.to raise_error(ArgumentError)
+      end
     end
   end
 
   describe ".transition!" do
-    subject { described_class.new(alphabet2, order=1, *other_params) }
+    subject { described_class.new(*params_for_new(alphabet2, order=1)) }
     it "changes the state" do
       subject.transition!(1)
       subject.current_state.should == 1
@@ -71,7 +76,7 @@ shared_examples_for "a simple markov chain" do
   end
 
   describe ".save" do
-    subject { described_class.new(alphabet2, order=1, *other_params) }
+    subject { described_class.new(*params_for_new(alphabet2, order=1)) }
     let(:filename) { "/tmp/rubymidi_markov_chain.yml" }
     it "saves the markov chain to a file" do
       subject.save filename

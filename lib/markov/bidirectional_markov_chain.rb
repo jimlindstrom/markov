@@ -1,19 +1,15 @@
 module Markov
   
   class BidirectionalMarkovChain < AsymmetricBidirectionalMarkovChain
-    def initialize(alphabet, order, lookahead, num_states)
-      super(alphabet, order, lookahead, num_states)
+    def initialize(output_alphabet, order, lookahead)
+      super(input_alphabet=output_alphabet, output_alphabet, order, lookahead)
     end
  
     def self.load(filename)
-      docs = []
-      File.open(filename, 'r') do |f|
-        YAML.load_stream(f).each { |d| docs.push d }
-      end
-      raise RuntimeError.new("bad markov file") if docs.length != 7
+      opts = JSON.parse(File.read(filename))
 
-      m = BidirectionalMarkovChain.new(docs[0], docs[1], docs[2], docs[3])
-      m.set_internals(docs[4], docs[5], docs[6])
+      m = BidirectionalMarkovChain.new(eval(opts["output_alphabet"]), opts["order"], opts["lookahead"])
+      m.set_internals(eval(opts["observations"]), eval(opts["state_history_string"]), eval(opts["steps_left"]))
 
       return m
     end

@@ -4,14 +4,14 @@ module Markov
 
     BACK_OFF_SCALING = 0.05
 
-    def initialize(alphabet, order, lookahead, num_states)
-      super(alphabet, order, lookahead, num_states)
+    def initialize(input_alphabet, output_alphabet, order, lookahead)
+      super(input_alphabet, output_alphabet, order, lookahead)
       if order == 1
         raise ArgumentError.new("You can't have a backoff chain with order 1, use AsymmetricBidirectionalMarkovChain instead")
       elsif order == 2
-        @sub_chain = AsymmetricBidirectionalMarkovChain.new(alphabet, order-1, lookahead, num_states)
+        @sub_chain = AsymmetricBidirectionalMarkovChain.new(input_alphabet, output_alphabet, order-1, lookahead)
       elsif order > 2
-        @sub_chain = AsymmetricBidirectionalBackoffMarkovChain.new(alphabet, order-1, lookahead, num_states)
+        @sub_chain = AsymmetricBidirectionalBackoffMarkovChain.new(input_alphabet, output_alphabet, order-1, lookahead)
       end
       reset!
     end
@@ -28,14 +28,10 @@ module Markov
     end
 
     def self.load(filename)
-      docs = []
-      File.open(filename, 'r') do |f|
-        YAML.load_stream(f).each { |d| docs.push d }
-      end
-      raise RuntimeError.new("bad markov file") if docs.length != 7
+      opts = JSON.parse(File.read(filename))
 
-      m = AsymmetricBidirectionalBackoffMarkovChain.new(docs[0], docs[1], docs[2], docs[3])
-      m.set_internals(docs[4], docs[5], docs[6])
+      m = AsymmetricBidirectionalBackoffMarkovChain.new(eval(opts["input_alphabet"]), eval(opts["output_alphabet"]), opts["order"], opts["lookahead"])
+      m.set_internals(eval(opts["observations"]), eval(opts["state_history_string"]), eval(opts["steps_left"]))
 
       sub_filename = filename.gsub(/\./,"_sub.")
       if m.order == 2
@@ -46,14 +42,14 @@ module Markov
       return m
     end
   
-    def observe!(symbol, steps_left)
-      super(symbol, steps_left)
-      @sub_chain.observe!(symbol, steps_left)
+    def observe!(output_symbol, steps_left)
+      super(output_symbol, steps_left)
+      @sub_chain.observe!(output_symbol, steps_left)
     end
   
-    def transition!(next_state, steps_left)
-      super(next_state, steps_left)
-      @sub_chain.transition!(next_state, steps_left)
+    def transition!(input_symbol, steps_left)
+      super(input_symbol, steps_left)
+      @sub_chain.transition!(input_symbol, steps_left)
     end
   
     def expectations
@@ -62,12 +58,11 @@ module Markov
       expectations = super
       sub_expectations = @sub_chain.expectations
 
-      0.upto([    expectations.alphabet.num_symbols-1, 
-              sub_expectations.alphabet.num_symbols-1].max) do |cur_symbol|
-        if expectations.observations[cur_symbol] && expectations.observations[cur_symbol] > 0
+      (expectations.alphabet.symbols & sub_expectations.alphabet.symbols).each do |cur_output_symbol|
+        if expectations.observations[cur_output_symbol] && expectations.observations[cur_output_symbol] > 0
           # noop
-        elsif sub_expectations.observations[cur_symbol]
-          expectations.observe!(cur_symbol, BACK_OFF_SCALING * sub_expectations.observations[cur_symbol])
+        elsif sub_expectations.observations[cur_output_symbol]
+          expectations.observe!(cur_output_symbol, BACK_OFF_SCALING * sub_expectations.observations[cur_output_symbol])
         end
       end
 

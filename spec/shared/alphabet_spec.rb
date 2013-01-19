@@ -49,6 +49,17 @@ shared_examples_for "a finite alphabet" do
     end
   end
 
+  describe "#symbol_is_valid?" do
+    context "when given a symbol in the alphabet" do
+      let(:sym) { alphabet.nth_symbol(0) }
+      specify { alphabet.symbol_is_valid?(sym).should be_true }
+    end
+    context "when given a symbol not in the alphabet" do
+      let(:sym) { "probably-not-a-symbol" }
+      specify { alphabet.symbol_is_valid?(sym).should be_false }
+    end
+  end
+
   describe "#+" do
     subject { alphabet + alphabet2 }
     it "returns a new alphabet" do

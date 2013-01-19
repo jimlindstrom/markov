@@ -32,6 +32,10 @@ module Markov
       idx
     end
 
+    def symbol_is_valid?(sym)
+      @alphabet.include?(sym)
+    end
+
     def +(other)
       LiteralAlphabet.new((symbols + other.symbols).uniq)
     end

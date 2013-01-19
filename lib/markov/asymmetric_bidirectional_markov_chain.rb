@@ -7,15 +7,14 @@ module Markov
 
     LOGGING = false
 
-    def initialize(alphabet, order, lookahead, num_states)
+    def initialize(input_alphabet, output_alphabet, order, lookahead)
       raise ArgumentError.new("order must be positive") if order < 1
-      raise ArgumentError.new("must have two or more states") if num_states < 2
       raise ArgumentError.new("must have a lookahead of 1 or more") if lookahead < 1
   
-      @alphabet = alphabet
+      @input_alphabet = input_alphabet
+      @output_alphabet = output_alphabet
       @order = order
       @lookahead = lookahead
-      @num_states = num_states
   
       @observations = {}
   
@@ -35,63 +34,56 @@ module Markov
   
     def save(filename)
       File.open(filename, 'w') do |f| 
-        f.puts YAML::dump @alphabet #0
-        f.puts YAML::dump @order #1
-        f.puts YAML::dump @lookahead #2
-        f.puts YAML::dump @num_states #3
-        f.puts YAML::dump @observations #4
-        f.puts YAML::dump @state_history_string #5
-        f.puts YAML::dump @steps_left #6
+        f.puts({ "input_alphabet"  => "Markov::LiteralAlphabet.new(#{@input_alphabet.symbols.to_s})", # FIXME
+                 "output_alphabet" => "Markov::LiteralAlphabet.new(#{@output_alphabet.symbols.to_s})", # FIXME
+                 "order" => @order,
+                 "lookahead" => @lookahead,
+                 "observations" => @observations.to_s,
+                 "state_history_string" => @state_history_string.to_s,
+                 "steps_left" => @steps_left.to_s }.to_json)
       end
     end
 
     def self.load(filename)
-      docs = []
-      File.open(filename, 'r') do |f|
-        YAML.load_stream(f).each { |d| docs.push d }
-      end
-      raise RuntimeError.new("bad markov file") if docs.length != 7
+      opts = JSON.parse(File.read(filename))
 
-      m = AsymmetricBidirectionalMarkovChain.new(docs[0], docs[1], docs[2], docs[3])
-      m.set_internals(docs[4], docs[5], docs[6])
+      m = AsymmetricBidirectionalMarkovChain.new(eval(opts["input_alphabet"]), eval(opts["output_alphabet"]), opts["order"], opts["lookahead"])
+      m.set_internals(eval(opts["observations"]), eval(opts["state_history_string"]), eval(opts["steps_left"]))
 
       return m
     end
   
-    def observe!(symbol, steps_left)
-      raise ArgumentError.new("symbol must be in 0..(num_symbols-1) range") if (symbol < 0) or (symbol >= @alphabet.num_symbols)
+    def observe!(output_symbol, steps_left)
+      raise ArgumentError.new("symbol #{output_symbol} must be in alphabet #{@output_alphabet.symbols}") if !@output_alphabet.symbol_is_valid?(output_symbol)
       raise ArgumentError.new("steps_left cannot be negative") if (steps_left < 0)
       raise ArgumentError.new("steps_left expected to be #{@steps_left-1}") if !@steps_left.nil? and (steps_left != (@steps_left-1))
   
       k = state_history_to_key
-      puts "observe    k: " + k.inspect + " => #{next_state},#{steps_left}" if LOGGING
       if @observations[k].nil?
         @observations[k] = {}
       end
-      if @observations[k][symbol].nil?
-        @observations[k][symbol] = 0
+      if @observations[k][output_symbol].nil?
+        @observations[k][output_symbol] = 0
       end
-      @observations[k][symbol] += 1
+      @observations[k][output_symbol] += 1
     end
   
-    def transition!(next_state, steps_left)
-      raise ArgumentError.new("state must be in 0..(num_states-1) range") if (next_state < 0) or (next_state >= @num_states)
+    def transition!(input_symbol, steps_left)
+      raise ArgumentError.new("symbol #{input_symbol} must be in alphabet #{@input_alphabet.symbols}") if !@input_alphabet.symbol_is_valid?(input_symbol)
       raise ArgumentError.new("steps_left cannot be negative") if (steps_left < 0)
       raise ArgumentError.new("steps_left expected to be #{@steps_left-1}") if !@steps_left.nil? and (steps_left != (@steps_left-1))
   
-      @state_history_string.push String(next_state || "nil")
+      @state_history_string.push String(input_symbol || "nil")
       @state_history_string.shift
 
-      puts "transition k: " + state_history_to_key.inspect + " (before)" if LOGGING
       @steps_left = steps_left if steps_left <= @lookahead
-      puts "transition k: " + state_history_to_key.inspect + " (after)" if LOGGING
     end
   
     def expectations
-      x = RandomVariable.new(@alphabet)
+      x = RandomVariable.new(@output_alphabet)
       k = state_history_to_key
-      (@observations[k] || {}).each do |symbol, num_observations|
-        x.observe!(symbol, num_observations)
+      (@observations[k] || {}).each do |output_symbol, num_observations|
+        x.observe!(output_symbol, num_observations)
       end
       return x
     end

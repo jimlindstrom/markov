@@ -1,4 +1,4 @@
-require 'yaml'
+require 'json'
 
 markov_files = ['version',
                 'literal_alphabet',

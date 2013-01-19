@@ -6,6 +6,8 @@ module Markov
     attr_reader :alphabet
 
     def initialize(alphabet)
+      raise RuntimeError.new("Alphabet cannot be nil") if !alphabet
+
       @alphabet              = alphabet
       @num_observations      = 0
       @observations          = { }
@@ -37,8 +39,7 @@ module Markov
     
     def observe!(symbol, num_observations=1)
       raise ArgumentError.new("num_observations must be >= 0") if num_observations < 0
-      raise ArgumentError.new("symbol must be >= 0") if symbol < 0
-      raise ArgumentError.new("symbol must be < #{@alphabet.num_symbols}") if symbol >= @alphabet.num_symbols
+      raise ArgumentError.new("symbol must be valid") if !@alphabet.symbol_is_valid?(symbol)
   
       @observations[symbol] = (@observations[symbol] || 0) + num_observations
       @num_observations += num_observations

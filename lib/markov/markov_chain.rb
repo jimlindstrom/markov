@@ -1,21 +1,15 @@
 module Markov
   
-  # This is just a markov chain where the outcomes are states.  (The more 
-  # general, asymmetric one lets the outcomes be something other than states.)
   class MarkovChain < AsymmetricMarkovChain
-    def initialize(alphabet, order)
-      super(alphabet, order, alphabet.num_symbols)
+    def initialize(output_alphabet, order)
+      super(input_alphabet=output_alphabet, output_alphabet, order)
     end
  
     def self.load(filename)
-      docs = []
-      File.open(filename, 'r') do |f|
-        YAML.load_stream(f).each { |d| docs.push d }
-      end
-      raise RuntimeError.new("bad markov file") if docs.length != 7
+      opts = JSON.parse(File.read(filename))
 
-      m = MarkovChain.new(docs[0], docs[2])
-      m.set_internals(docs[4], docs[5], docs[6])
+      m = MarkovChain.new(eval(opts["output_alphabet"]), opts["order"])
+      m.set_internals(eval(opts["observations"]), eval(opts["state_history_string"]), eval(opts["steps_left"]))
 
       return m
     end

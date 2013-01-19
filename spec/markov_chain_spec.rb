@@ -8,7 +8,9 @@ describe Markov::MarkovChain do
   let(:alphabet90) { Markov::LiteralAlphabet.new((1..90).to_a) }
 
   it_should_behave_like "a simple markov chain" do
-    let(:other_params) { [] }
+    def params_for_new(output_alphabet, order)
+      [output_alphabet, order]
+    end
   end
 
   describe "#load" do
@@ -21,7 +23,7 @@ describe Markov::MarkovChain do
         end
         @mc.reset!
         @mc.transition!(2)
-        @filename = "/tmp/rubymidi_markov_chain.yml"
+        @filename = "/tmp/rubymidi_markov_chain.json"
         @mc.save @filename
       end
       it "loads the markov chain to a file" do
@@ -37,14 +39,14 @@ describe Markov::MarkovChain do
       its(:expectations) { should be_an_instance_of Markov::RandomVariable }
       context "given some observations" do
         before(:each) do
-          2.times { subject.observe!(1) }
-          1.times { subject.observe!(0) }
+          2.times { subject.observe!(2) }
+          1.times { subject.observe!(1) }
         end
         it "returns a random variable that is less surprised about states observe!d more often" do
-          subject.expectations.surprise_for(1).should be <  subject.expectations.surprise_for(0)
+          subject.expectations.surprise_for(2).should be <  subject.expectations.surprise_for(1)
         end
         it "returns a random variable that only chooses states observe!d" do
-          [0, 1].should include(subject.expectations.sample)
+          [1, 2].should include(subject.expectations.sample)
         end
       end
     end
@@ -57,12 +59,12 @@ describe Markov::MarkovChain do
           subject.transition!(x)
         end
         subject.reset!
-        [0, 2, 3].each do |x|
+        [9, 2, 3].each do |x|
           subject.observe!(x)
           subject.transition!(x)
         end
         subject.reset!
-        [0, 2].each do |x|
+        [9, 2].each do |x|
           subject.transition!(x)
         end
         subject.expectations.sample.should == 3
