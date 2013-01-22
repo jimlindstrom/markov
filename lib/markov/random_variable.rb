@@ -33,33 +33,54 @@ module Markov
       return rnew
     end
 
+    def normalized_and_weighted_by_entropy
+      rnew = RandomVariable.new(@alphabet)
+      
+      scale = (1.0 / (@num_observations + 0.1)) * (max_entropy / (entropy + 0.1))
+      @observations.each { |symbol, num_obs| rnew.observe!(symbol, num_obs*scale) }
+  
+      return rnew
+    end
+
     def num_observations_for(symbol)
       @observations[symbol] || 0
     end
     
     def observe!(symbol, num_observations=1)
-      raise ArgumentError.new("num_observations must be >= 0") if num_observations < 0
-      raise ArgumentError.new("symbol must be valid") if !@alphabet.symbol_is_valid?(symbol)
+      unless $MARKOV__SKIP_SLOW_ERROR_CHECKING
+        raise ArgumentError.new("num_observations must be >= 0") if num_observations < 0
+        raise ArgumentError.new("symbol must be valid") if !@alphabet.symbol_is_valid?(symbol)
+      end
   
       @observations[symbol] = (@observations[symbol] || 0) + num_observations
       @num_observations += num_observations
     end
   
     def sample
-      # we can't generate anything w/o any observations
-      return nil if @num_observations == 0
-  
-      # generate a outcome, based on the CDF
-      observed_symbols = @observations.keys
-      r = (rand*(observed_symbols.length-1.0)).round
-  
-      symbol = observed_symbols.shift
-      while r >= @observations[symbol]
-        r -= @observations[symbol]
+      begin
+        # we can't generate anything w/o any observations
+        return nil if @num_observations == 0
+    
+        # generate a outcome, based on the CDF
+        observed_symbols = @observations.keys
+        r = (rand*(observed_symbols.length-1.0)).round
+    
         symbol = observed_symbols.shift
+        # the latter two clauses on this while loop are to avoid the rare case of floating point
+        # rounding error accumulation. Ideally r would never exceed the sum of the observed observations,
+        # but we're repeatedly subtracting a floating point value from r, such that sometimes, this
+        # while loop would otherwise enter a final phantom iteration, and try to pick a nil symbol.
+        while (r >= @observations[symbol]) && (symbol) && (@observations[symbol]) 
+          r -= @observations[symbol]
+          symbol = observed_symbols.shift
+        end
+        return symbol
+      rescue Exception => e
+        puts "oops. self: " + self.inspect
+        puts "message: " + e.message.inspect
+        puts "backtrace: " + e.backtrace.inspect
+        raise e
       end
-      return symbol
-  
     end
     
     def probability_of(symbol)
