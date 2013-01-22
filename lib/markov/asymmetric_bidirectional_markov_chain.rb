@@ -54,9 +54,11 @@ module Markov
     end
   
     def observe!(output_symbol, steps_left)
-      raise ArgumentError.new("symbol #{output_symbol} must be in alphabet #{@output_alphabet.symbols}") if !@output_alphabet.symbol_is_valid?(output_symbol)
-      raise ArgumentError.new("steps_left cannot be negative") if (steps_left < 0)
-      raise ArgumentError.new("steps_left expected to be #{@steps_left-1}") if !@steps_left.nil? and (steps_left != (@steps_left-1))
+      unless $MARKOV__SKIP_SLOW_ERROR_CHECKING
+        raise ArgumentError.new("symbol #{output_symbol} must be in alphabet #{@output_alphabet.symbols}") if !@output_alphabet.symbol_is_valid?(output_symbol)
+        raise ArgumentError.new("steps_left cannot be negative") if (steps_left < 0)
+        raise ArgumentError.new("steps_left expected to be #{@steps_left-1}") if !@steps_left.nil? and (steps_left != (@steps_left-1))
+      end
   
       k = state_history_to_key
       if @observations[k].nil?
@@ -69,9 +71,11 @@ module Markov
     end
   
     def transition!(input_symbol, steps_left)
-      raise ArgumentError.new("symbol #{input_symbol} must be in alphabet #{@input_alphabet.symbols}") if !@input_alphabet.symbol_is_valid?(input_symbol)
-      raise ArgumentError.new("steps_left cannot be negative") if (steps_left < 0)
-      raise ArgumentError.new("steps_left expected to be #{@steps_left-1}") if !@steps_left.nil? and (steps_left != (@steps_left-1))
+      unless $MARKOV__SKIP_SLOW_ERROR_CHECKING
+        raise ArgumentError.new("symbol #{input_symbol} must be in alphabet #{@input_alphabet.symbols}") if !@input_alphabet.symbol_is_valid?(input_symbol)
+        raise ArgumentError.new("steps_left cannot be negative") if (steps_left < 0)
+        raise ArgumentError.new("steps_left expected to be #{@steps_left-1}") if !@steps_left.nil? and (steps_left != (@steps_left-1))
+      end
   
       @state_history_string.push String(input_symbol || "nil")
       @state_history_string.shift
