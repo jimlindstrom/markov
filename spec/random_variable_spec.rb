@@ -59,6 +59,19 @@ describe Markov::RandomVariable do
     end
   end
 
+  describe "#normalized_and_weighted_by_entropy" do
+    it "returns a new random variable" do
+      pending
+    end
+    it "its alphabet is the same" do
+      pending
+    end
+    it "its observations are proportional, but scaled by 1/observations*max_entropy/entropy" do
+      # this isn't strictly true, because I had to add a fudge factor. Why is that?
+      pending
+    end
+  end
+
   describe "#observe!" do
     subject { Markov::RandomVariable.new(small_alphabet) }
     context "when the the observed symbol is outside 0..(num_symbols-1)" do
