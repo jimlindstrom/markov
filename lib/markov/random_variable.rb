@@ -57,7 +57,7 @@ module Markov
     end
   
     def sample
-      begin
+      begin # FIXME: this is just here to catch a flaky bug. I think I've got it, now, and this could safely be removed
         # we can't generate anything w/o any observations
         return nil if @num_observations == 0
     
@@ -66,11 +66,11 @@ module Markov
         r = (rand*(observed_symbols.length-1.0)).round
     
         symbol = observed_symbols.shift
-        # the latter two clauses on this while loop are to avoid the rare case of floating point
+        # the first two clauses on this while loop are to avoid the rare case of floating point
         # rounding error accumulation. Ideally r would never exceed the sum of the observed observations,
         # but we're repeatedly subtracting a floating point value from r, such that sometimes, this
         # while loop would otherwise enter a final phantom iteration, and try to pick a nil symbol.
-        while (r >= @observations[symbol]) && (symbol) && (@observations[symbol]) 
+        while (symbol) && (@observations[symbol]) && (r >= @observations[symbol])
           r -= @observations[symbol]
           symbol = observed_symbols.shift
         end
