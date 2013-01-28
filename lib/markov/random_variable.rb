@@ -57,30 +57,24 @@ module Markov
     end
   
     def sample
-      begin # FIXME: this is just here to catch a flaky bug. I think I've got it, now, and this could safely be removed
-        # we can't generate anything w/o any observations
-        return nil if @num_observations == 0
-    
-        # generate a outcome, based on the CDF
-        observed_symbols = @observations.keys
-        r = (rand*(observed_symbols.length-1.0)).round
-    
+      # we can't generate anything w/o any observations
+      return nil if @num_observations == 0
+  
+      # generate a outcome, based on the CDF
+      observed_symbols = @observations.keys
+      r = rand*@observations.values.inject(:+)
+  
+      symbol = observed_symbols.shift
+      # the first two clauses on this while loop are to avoid the rare case of floating point
+      # rounding error accumulation. Ideally r would never exceed the sum of the observed observations,
+      # but we're repeatedly subtracting a floating point value from r, such that sometimes, this
+      # while loop would otherwise enter a final phantom iteration, and try to pick a nil symbol.
+      while (symbol) && (@observations[symbol]) && (r >= @observations[symbol])
+        r -= @observations[symbol]
         symbol = observed_symbols.shift
-        # the first two clauses on this while loop are to avoid the rare case of floating point
-        # rounding error accumulation. Ideally r would never exceed the sum of the observed observations,
-        # but we're repeatedly subtracting a floating point value from r, such that sometimes, this
-        # while loop would otherwise enter a final phantom iteration, and try to pick a nil symbol.
-        while (symbol) && (@observations[symbol]) && (r >= @observations[symbol])
-          r -= @observations[symbol]
-          symbol = observed_symbols.shift
-        end
-        return symbol
-      rescue Exception => e
-        puts "oops. self: " + self.inspect
-        puts "message: " + e.message.inspect
-        puts "backtrace: " + e.backtrace.inspect
-        raise e
       end
+      return symbol if symbol # the usual case
+      return @observations.keys.last # in case floating point error pushes us past the end.
     end
     
     def probability_of(symbol)
